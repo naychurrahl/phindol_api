@@ -1,0 +1,11 @@
+config/
+*.ignore/
+bak/
+deleted/
+sand/
+sandbox/
+uploads/
+misc/
+*.bak
+*.iso
+*.old

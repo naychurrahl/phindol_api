@@ -1,0 +1,1198 @@
+openapi: 3.0.4
+
+info:
+  title: SWIFT DROP
+  description: Swift drop logistics
+  version: 0.0.1
+
+servers:
+  - url: '{scheeme}://localhost:6600/'
+    description: offline production unit
+    variables:
+      scheeme:
+        description: http s or not
+        default: http
+        enum:
+         - http
+         - https
+
+  - url: '{scheeme}://Swiftdrop.com:6600/'
+    description: online production unit
+    variables:
+      scheeme:
+        description: http s or not
+        default: https
+        enum:
+         - http
+         - https
+
+components:
+  securitySchemes:
+    Auth:
+      type: apiKey
+      in: header
+      name: Authorization
+    Login:
+      type: apiKey
+      in: header
+      name: Authorization
+    Reset:
+      type: apiKey
+      in: header
+      name: Authorization
+    Signup:
+      type: apiKey
+      in: header
+      name: Authorization
+
+paths:
+  #=============== AUTH =====================
+
+  /auth/register:
+    post:
+      summary: Creates a new user
+      description: >
+        <h1>Creates a new user</h1>
+        takes <ul>
+        <li>email</li>
+        <li>role</li>
+        <li>names</li>
+        <li>password</li>
+        </ul> as form input 
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: "e@mail.com"
+                role:
+                  type: string
+                  enum: ['consumer', 'business', 'driver', 'admin']
+                  example: "consumer"
+                names:
+                  type: string
+                  example: "Olopade Isaiah Jekunde"
+                password:
+                  type: string
+                  example: "strongPassword123!"
+
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: string
+                  email:
+                    type: string
+                  token:
+                    type: string
+                  otp:
+                    type: string
+                example:
+                  userId: '1234567890'
+                  email: 'e@mail.com'
+                  token: 'lckweiwory9rf.uo3oeshfbcdcblakjhaldsnckj.dxnkjldnsakjc'
+
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    'error': string
+                example:
+                  'error': 'error message'
+
+        "500":
+          description: INTERNAL ERROR!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+
+  /auth/register/{token}:
+    patch:
+      summary: Creates a new user
+      description: >
+        <h1> Activate user </h1>
+        Complete the registration flow here</br>
+        Takes <b>{token}</b> as input from path
+      security:
+        - Signup: []
+
+      parameters:
+        - in: path
+          name: token
+          required: true
+          schema:
+            type: string
+          description: user's id
+          example: user_12346678
+
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    '200': string
+                example:
+                  '200': 'OTP sent'
+
+        "500":
+          description: error!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+
+  /auth/login:
+    post:
+      summary: Logs in a user
+      description: >
+        <h1>Initiates the log in flow</h1>
+        takes <ul>
+        <li>user: (user id or email) </li>
+        <li>password</li>
+        </ul> as input <br/>
+        Sends otp to user and returns Token or error
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: string
+                  example: "e@mail.com"
+                password:
+                  type: string
+                  example: "strongPassword123!"
+        
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: string
+                example: eyJ0eXA6tyr4escxgCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiI2OGFmNTY2ZmNkZmFt76rufjhaWwiOiJlQG1haWwuY29tIiwicm9sZSI6ImNvbnN1bWVyIiwidG9rZW4iOm51bGwsIm5vbmNlIjo0OTQ2LCJ1c2UiOiJhdXRoIn0._ZoWsCV_-wll93PSy7xcLoS_hxtzDxs_Ji76tr4xs2a
+
+        "500":
+          description: INTERNAL ERROR!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+
+  /auth/login/{token}:
+    patch:
+      summary: Logs in a user
+      description: >
+        <h1>COMPLETES LOGIN FLOW</h1>
+        takes otp as path input </br>
+        requires Auth<br/>
+        returns Token or error
+
+      security:
+        - Login: []
+
+      parameters:
+        - in: path
+          name: token
+          required: true
+          schema:
+            type: string
+          description: otp
+          example: 67yu9t
+
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 'eyJ0eXA6tyr4escxgCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiI2OGFmNTY2ZmNkZmFt76rufjhaWwiOiJlQG1haWwuY29tIiwicm9sZSI6ImNvbnN1bWVyIiwidG9rZW4iOm51bGwsIm5vbmNlIjo0OTQ2LCJ1c2UiOiJhdXRoIn0._ZoWsCV_-wll93PSy7xcLoS_hxtzDxs_Ji76tr4xs2a'
+
+        "500":
+          description: INTERNAL ERROR!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+
+  /auth/logout:
+    post:
+      summary: Logs out a user
+      description: >
+        <h1>Logs a user out</h1>
+        takes no input but requires Auth<br/>
+        returns True or error
+      security:
+        - Auth: []
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 'Logged out'
+
+        "500":
+          description: INTERNAL ERROR!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+
+  /auth/forgot/{user}:
+    post:
+      summary: Reset user's password
+      description: >
+        <h1>Initiates password reset</h1>
+        takes user id or email as path input <br/>
+        Sends otp to user and returns Token or error
+
+      parameters:
+        - in: path
+          name: user
+          required: true
+          schema:
+            type: string
+          description: user id or email
+          example: e@mail.com
+        
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: string
+                example: eyJ0eXA6tyr4escxgCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiI2OGFmNTY2ZmNkZmFt76rufjhaWwiOiJlQG1haWwuY29tIiwicm9sZSI6ImNvbnN1bWVyIiwidG9rZW4iOm51bGwsIm5vbmNlIjo0OTQ2LCJ1c2UiOiJhdXRoIn0._ZoWsCV_-wll93PSy7xcLoS_hxtzDxs_Ji76tr4xs2a
+
+        "500":
+          description: INTERNAL ERROR!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+    
+  /auth/forgot:
+    patch:
+      summary: Reset user's password
+      description: >
+        <h1>Completes password reset</h1>
+        takes otp as path input <br/>
+        Sends otp to user and returns Token or error </br>
+        Requires Auth
+
+      security:
+        - Reset: []
+        
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                otp:
+                  type: string
+                  example: 78u098
+                password:
+                  type: string
+                  example: "newStrongPassword123!"
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: string
+                example: eyJ0eXA6tyr4escxgCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiI2OGFmNTY2ZmNkZmFt76rufjhaWwiOiJlQG1haWwuY29tIiwicm9sZSI6ImNvbnN1bWVyIiwidG9rZW4iOm51bGwsIm5vbmNlIjo0OTQ2LCJ1c2UiOiJhdXRoIn0._ZoWsCV_-wll93PSy7xcLoS_hxtzDxs_Ji76tr4xs2a
+
+        "500":
+          description: INTERNAL ERROR!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+
+  #=============== OTP =====================
+
+  /otp/{user}:
+    post:
+      summary: request for otp
+      description: >
+        Requests for otp for any reason whatsoever</br>
+        takes userid or email as iput from paths</br>
+        returns sucess irespective of if the user exist</br>
+        However, if the user exists, they'll get the code</br>
+
+      parameters:
+        - in: path
+          name: user
+          required: true
+          schema:
+            type: string
+          description: user's id
+          example: user_12346678
+
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    '200': string
+                example:
+                  '200': 'OTP sent'
+
+        "500":
+          description: error!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+
+  #=============== USER =====================
+
+  /user/profile:
+    get:
+      summary: Fetch user profile
+      description: >
+        <h1>Fetches user profile</h1>
+        takes no input <br/>
+        Requires Auth
+
+      security:
+        - Auth: []
+      
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+
+        "500":
+          description: INTERNAL ERROR!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+    post:
+      summary: Fetch user profile
+      description: >
+        <h1>Fetches user profile</h1>
+        takes no input <br/>
+        Requires Auth
+
+      security:
+        - Auth: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                names:
+                  type: string
+                  example: "stone cold killa"
+                location:
+                  type: string
+                  example: Alagbon
+      
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+
+        "500":
+          description: INTERNAL ERROR!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+ 
+  #=============== SHOP =====================
+
+  /shop/create:
+    post:
+      summary: Crerates a shop
+      description: >
+        <h1>Fetches user profile</h1>
+        takes no input <br/>
+        Requires Auth
+
+      security:
+        - Auth: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "stone cold"
+                description:
+                  type: string
+                  example: "We upp moo fuckers"
+                address:
+                  type: string
+                  example: Alagbon
+                phone:
+                  type: string
+                  example: '+2341234567890'
+      
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+
+        "500":
+          description: INTERNAL ERROR!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+
+  /shop/list:
+    get:
+      summary: Crerates a shop
+      description: >
+        <h1>Fetches user profile</h1>
+        takes no input <br/>
+        Requires Auth
+
+      
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+
+        "500":
+          description: INTERNAL ERROR!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+  
+  /shop/{shopid}:
+    get:
+      summary: Logs in a user
+      description: >
+        <h1>COMPLETES LOGIN FLOW</h1>
+        takes otp as path input </br>
+        requires Auth<br/>
+        returns Token or error
+
+      parameters:
+        - in: path
+          name: shopid
+          required: true
+          schema:
+            type: string
+          description: Shop id
+          example: biz_1234567890
+
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 'ok'
+
+        "500":
+          description: INTERNAL ERROR!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+
+  #=============== PRODUCT =====================
+  
+  /product/:
+    post:
+      summary: Creates a product
+      description: >
+        <h1>Fetches user profile</h1>
+        takes no input <br/>
+        Requires Auth
+
+      security:
+        - Auth: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                business_id:
+                  type: string
+                  example: biz_1234567890
+                name:
+                  type: string
+                  example: "Cold stone"
+                description:
+                  type: string
+                  example: "Yummy"
+                price:
+                  type: string
+                  example: '2500'
+                stock:
+                  type: string
+                  example: 'Yes'
+      
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+
+        "500":
+          description: INTERNAL ERROR!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+  
+    patch:
+      summary: Updates a product
+      description: >
+        <h1>Fetches user profile</h1>
+        takes no input <br/>
+        Requires Auth
+
+      security:
+        - Auth: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product_id:
+                  type: string
+                  example: "prod_1234567890"
+                name:
+                  type: string
+                  example: "Cold stone"
+                description:
+                  type: string
+                  example: "Yummy"
+                price:
+                  type: string
+                  example: '2500'
+                stock:
+                  type: string
+                  example: 'true'
+      
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+
+        "500":
+          description: INTERNAL ERROR!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+  
+    get:
+      summary: Get's product details
+      description: >
+        <h1>COMPLETES LOGIN FLOW</h1>
+        takes otp as path input </br>
+        requires Auth<br/>
+        returns Token or error
+
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 'ok'
+
+        "500":
+          description: INTERNAL ERROR!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+    
+  /product/{productId}:
+    get:
+      summary: Get's product details
+      description: >
+        <h1>COMPLETES LOGIN FLOW</h1>
+        takes otp as path input </br>
+        requires Auth<br/>
+        returns Token or error
+
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          schema:
+            type: string
+          description: product id
+          example: prod_1234567890
+
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 'ok'
+
+        "500":
+          description: INTERNAL ERROR!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+
+  #=============== CART =====================
+  
+  /cart/:
+    get:
+      summary: Get CART content
+      description: >
+        <h1>COMPLETES LOGIN FLOW</h1>
+        takes otp as path input </br>
+        requires Auth<br/>
+        returns Token or error
+
+      security:
+        - Auth: []
+
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 'ok'
+
+        "500":
+          description: INTERNAL ERROR!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+  
+  /cart/add/{puid}:
+    post:
+      summary: Get CART content
+      description: >
+        <h1>COMPLETES LOGIN FLOW</h1>
+        takes otp as path input </br>
+        requires Auth<br/>
+        returns Token or error
+
+      security:
+        - Auth: []
+
+      parameters:
+        - in: path
+          name: puid
+          required: false
+          schema:
+            type: string
+          description: user's id
+          example: prod_1234667890
+
+      requestBody:
+        required: False
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product_id:
+                  type: string
+                  example: "prod_1234567890"
+                quantity:
+                  type: number
+                  example: 1
+
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 'ok'
+
+        "500":
+          description: INTERNAL ERROR!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+  
+  /cart/remove/{puid}:
+    post:
+      summary: REMOVESF FROM CART
+      description: >
+        <h1>Removwes FROM CART</h1>
+        takes otp as path input </br>
+        requires Auth<br/>
+        returns Token or error
+
+      security:
+        - Auth: []
+
+      parameters:
+        - in: path
+          name: puid
+          required: false
+          schema:
+            type: string
+          description: user's id
+          example: prod_1234667890
+
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 'ok'
+
+        "500":
+          description: INTERNAL ERROR!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+  
+  /cart/remove:
+    post:
+      summary: EMPTIES CART
+      description: >
+        <h1>Removwes FROM CART</h1>
+        takes otp as path input </br>
+        requires Auth<br/>
+        returns Token or error
+
+      security:
+        - Auth: []
+
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 'ok'
+
+        "500":
+          description: INTERNAL ERROR!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+  
+  #=========== CHECK OUT =================
+  
+  /checkout/:
+    post:
+      summary: CHECKOUT
+      description: >
+        <h1>INITIATES CHECKOUT</h1>
+        takes otp as path input </br>
+        requires Auth<br/>
+        returns Token or error
+
+      security:
+        - Auth: []
+
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 'ok'
+
+        "500":
+          description: INTERNAL ERROR!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+  
+  #=============== O R D E R =====================
+  
+  /order/:
+    get:
+      summary: CHECKOUT
+      description: >
+        <h1>INITIATES CHECKOUT</h1>
+        takes otp as path input </br>
+        requires Auth<br/>
+        returns Token or error
+
+      security:
+        - Auth: []
+
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 'ok'
+
+        "500":
+          description: INTERNAL ERROR!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+  
+  /order/{order_id}:
+    get:
+      summary: Gets an order detail
+      description: >
+        <h1>Removwes FROM CART</h1>
+        takes otp as path input </br>
+        requires Auth<br/>
+        returns Token or error
+
+      security:
+        - Auth: []
+
+      parameters:
+        - in: path
+          name: order_id
+          required: true
+          schema:
+            type: string
+          description: order's id
+          example: order_1234667890
+
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 'ok'
+
+        "500":
+          description: INTERNAL ERROR!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+
+    patch:
+      summary: Update an order
+      description: >
+        <h1>UPDATE ORDER</h1>
+        takes otp as path input </br>
+        requires Auth<br/>
+        returns Token or error
+
+      security:
+        - Auth: []
+
+      parameters:
+        - in: path
+          name: order_id
+          required: true
+          schema:
+            type: string
+          description: order's id
+          example: order_1234667890
+
+      requestBody:
+        required: False
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                orderId:
+                  type: string
+                  example: "order_1234667890"
+                status:
+                  type: string
+                  enum: ['pending', 'in_progress', 'out_for_delivery', 'delivered', 'cancelled']
+                  example: 'pending'
+
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: string
+                example: 'ok'
+
+        "500":
+          description: INTERNAL ERROR!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    error: string
+                example:
+                  error: Internal ERROR!
+  
+  #=============== PING!! =====================
+
+  /ping:
+    get:
+      summary: pong!
+      description: Hello world! but with swagger
+      responses:
+        "200":
+          description: ok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  timestamp:
+                    type: integer
+                  message:
+                    type: string
+                example:
+                  status: ok
+                  timestamp: 1234567
+                  message: Pong!
+        "500":
+          description: error!
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  timestamp:
+                    type: integer
+                  message:
+                    type: string
+                example:
+                  status: error
+                  timestamp: 1234567
+                  message: ERROR!
