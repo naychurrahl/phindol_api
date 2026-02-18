@@ -644,6 +644,7 @@ class Functions
             foreach ($products as $product) {
                 $cats = explode(',', $product['category']);
                 
+                $products[$i]["id"] = (string)$products[$i]["id"];
                 $products[$i]["price"] = (float)$products[$i]["price"];
                 $products[$i]["category"] = $cats;
                 
