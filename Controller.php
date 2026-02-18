@@ -52,6 +52,8 @@ class Controller
             case 'ping':
                 $this -> functions -> ping();
                 break;
+            default:
+                $this -> functions -> fetchProduct();
         }
             
     }

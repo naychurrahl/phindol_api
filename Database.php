@@ -2,20 +2,19 @@
 
     class Database {
 
-        private $host = null;
+        private $host;
 
-        private $db   = null;
+        private $db;
 
-        private $user = null;
+        private $user;
 
-        private $pass = null;
+        private $pass;
 
         private $charset = 'utf8mb4';
 
-
         private $pdo;
 
-        private static $instance = null;
+        private static $instance;
 
 
         private function __construct() {
@@ -69,11 +68,11 @@
 
 
         // Singleton pattern: one connection only
-        public static function getInstance() {
+        public static function getInstance(): Database {
 
-            if (self::$instance === null) {
+            if (! self::$instance) {
 
-                self::$instance = new Database();
+                self::$instance = new self();
 
             }
 
