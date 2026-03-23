@@ -52,6 +52,31 @@ class Controller
             case 'ping':
                 $this -> functions -> ping();
                 break;
+
+            case 'product':
+                switch ($this -> method) {
+                    case 'DELETE':
+                        # code...
+                        break;
+
+                    case 'GET':
+                        $this->functions->fetchProduct();
+                        break;
+
+                    case 'POST':
+                        $this->functions->addProduct($this -> requestBody);
+                        break;
+
+                    case 'PUT':
+                        $this->functions->updateProduct($this->requestBody);
+                        break;
+                    
+                    default:
+                        $this -> methodNotAllowed(['GET', 'POST', 'PUT', 'DELETE']);
+                        break;
+                }
+                break;
+
             default:
                 $this -> functions -> fetchProduct();
         }

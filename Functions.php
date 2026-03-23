@@ -614,142 +614,148 @@ class Functions
     // == ORDERS ==
 
     // == PRODUCTS ==
-    public function addProduct(): void {}
+        public function addProduct(array $product): void 
+        {
+            $this -> consoleLog($product);
+        }
 
-    public function deleteProduct(string $produt): void {}
+        public function deleteProduct(string $productId): void {}
 
-    public function fetchProduct(string $produt = null): void
-    {
+        public function fetchProduct(string $productId = null): void
+        {
 
 
-        $db = Database::getInstance();
-        $con = $db->connect();
+            $db = Database::getInstance();
+            $con = $db->connect();
 
-        try {
-            $stmt = $con->prepare("
-                SELECT p.id, p.name, p.price, p.image, p.stock, p.description, GROUP_CONCAT(c.category) as category 
-                FROM products p
-                LEFT JOIN productcategories c ON p.name = c.product
-                GROUP BY p.name
-            ");
+            try {
+                $stmt = $con->prepare("
+                    SELECT p.id, p.name, p.price, p.image, p.stock, p.description, GROUP_CONCAT(c.category) as category 
+                    FROM products p
+                    LEFT JOIN productcategories c ON p.name = c.product
+                    GROUP BY p.name
+                ");
 
-            $stmt->execute();
+                $stmt->execute();
 
-            $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            $categories = ["All" => ""];
+                $categories = ["All" => ""];
 
-            $i = 0;
+                $i = 0;
 
-            foreach ($products as $product) {
-                $cats = explode(',', $product['category']);
-                
-                $products[$i]["id"] = (string)$products[$i]["id"];
-                $products[$i]["price"] = (float)$products[$i]["price"];
-                $products[$i]["category"] = $cats;
-                
-                foreach ($cats as $cat) {
-                    $categories[$cat] = "";
+                foreach ($products as $product) {
+                    $cats = explode(',', $product['category']);
+                    
+                    $products[$i]["id"] = (string)$products[$i]["id"];
+                    $products[$i]["price"] = (float)$products[$i]["price"];
+                    $products[$i]["category"] = $cats;
+                    
+                    foreach ($cats as $cat) {
+                        $categories[$cat] = "";
+                    }
+
+                    $i++;
                 }
 
-                $i++;
+                $categories = array_keys($categories);
+                exit($this->consoleLog(["categories" => $categories, "products" => $products]));
+            } catch (PDOException $e) {
+                $this->consoleLog(['Error!' => $e]);
             }
+
+
+            /*$products = [
+                [
+                    "id" => '1',
+                    "name" => 'Wireless Headphones',
+                    "price" => 79.99,
+                    "image" => 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400',
+                    "stock" => 15,
+                    "category" => ['Jeans', 'Children'],
+                    "description" => 'High-quality wireless headphones with noise cancellation and long battery life.'
+                ],
+                [
+                    "id" => '2',
+                    "name" => 'Smart Watch',
+                    "price" => 199.99,
+                    "image" => 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400',
+                    "stock" => 8,
+                    "category" => ['Electronics', 'Pine apple'],
+                    "description" => 'Feature-rich smartwatch with health tracking and notifications.'
+                ],
+                [
+                    "id" => '3',
+                    "name" => 'Cotton T-Shirt',
+                    "price" => 24.99,
+                    "image" => 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400',
+                    "stock" => 50,
+                    "category" => ['Ready made'],
+                    "description" => 'Comfortable 100% cotton t-shirt in various colors.'
+                ],
+                [
+                    "id" => '4',
+                    "name" => 'Coffee Maker',
+                    "price" => 89.99,
+                    "image" => 'https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?w=400',
+                    "stock" => 12,
+                    "category" => ['Home'],
+                    "description" => 'Programmable coffee maker with thermal carafe.'
+                ],
+                [
+                    "id" => '5',
+                    "name" => 'Fiction Novel',
+                    "price" => 14.99,
+                    "image" => 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400',
+                    "stock" => 30,
+                    "category" => ['Books'],
+                    "description" => 'Bestselling fiction novel by acclaimed author.'
+                ],
+                [
+                    "id" => '6',
+                    "name" => 'Running Shoes',
+                    "price" => 119.99,
+                    "image" => 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400',
+                    "stock" => 20,
+                    "category" => ['Ready made'],
+                    "description" => 'Lightweight running shoes with superior cushioning.'
+                ],
+                [
+                    "id" => '7',
+                    "name" => 'Desk Lamp',
+                    "price" => 39.99,
+                    "image" => 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=400',
+                    "stock" => 25,
+                    "category" => ['Home'],
+                    "description" => 'Modern LED desk lamp with adjustable brightness.'
+                ],
+                [
+                    "id" => '8',
+                    "name" => 'Bluetooth Speaker',
+                    "price" => 59.99,
+                    "image" => 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400',
+                    "stock" => 5,
+                    "category" => ['Electronics'],
+                    "description" => 'Portable Bluetooth speaker with 360-degree sound.'
+                ]
+            ];
+
+            foreach ($products as $product) {
+                foreach ($product["category"] as $cat) {
+                    $categories[$cat] = "";
+                }
+            }*/
+
 
             $categories = array_keys($categories);
             exit($this->consoleLog(["categories" => $categories, "products" => $products]));
-        } catch (PDOException $e) {
-            $this->consoleLog(['Error!' => $e]);
+            
         }
 
-
-        /*$products = [
-            [
-                "id" => '1',
-                "name" => 'Wireless Headphones',
-                "price" => 79.99,
-                "image" => 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400',
-                "stock" => 15,
-                "category" => ['Jeans', 'Children'],
-                "description" => 'High-quality wireless headphones with noise cancellation and long battery life.'
-            ],
-            [
-                "id" => '2',
-                "name" => 'Smart Watch',
-                "price" => 199.99,
-                "image" => 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400',
-                "stock" => 8,
-                "category" => ['Electronics', 'Pine apple'],
-                "description" => 'Feature-rich smartwatch with health tracking and notifications.'
-            ],
-            [
-                "id" => '3',
-                "name" => 'Cotton T-Shirt',
-                "price" => 24.99,
-                "image" => 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400',
-                "stock" => 50,
-                "category" => ['Ready made'],
-                "description" => 'Comfortable 100% cotton t-shirt in various colors.'
-            ],
-            [
-                "id" => '4',
-                "name" => 'Coffee Maker',
-                "price" => 89.99,
-                "image" => 'https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?w=400',
-                "stock" => 12,
-                "category" => ['Home'],
-                "description" => 'Programmable coffee maker with thermal carafe.'
-            ],
-            [
-                "id" => '5',
-                "name" => 'Fiction Novel',
-                "price" => 14.99,
-                "image" => 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400',
-                "stock" => 30,
-                "category" => ['Books'],
-                "description" => 'Bestselling fiction novel by acclaimed author.'
-            ],
-            [
-                "id" => '6',
-                "name" => 'Running Shoes',
-                "price" => 119.99,
-                "image" => 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400',
-                "stock" => 20,
-                "category" => ['Ready made'],
-                "description" => 'Lightweight running shoes with superior cushioning.'
-            ],
-            [
-                "id" => '7',
-                "name" => 'Desk Lamp',
-                "price" => 39.99,
-                "image" => 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=400',
-                "stock" => 25,
-                "category" => ['Home'],
-                "description" => 'Modern LED desk lamp with adjustable brightness.'
-            ],
-            [
-                "id" => '8',
-                "name" => 'Bluetooth Speaker',
-                "price" => 59.99,
-                "image" => 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=400',
-                "stock" => 5,
-                "category" => ['Electronics'],
-                "description" => 'Portable Bluetooth speaker with 360-degree sound.'
-            ]
-        ];
-
-        foreach ($products as $product) {
-            foreach ($product["category"] as $cat) {
-                $categories[$cat] = "";
-            }
-        }*/
-
-
-        $categories = array_keys($categories);
-        exit($this->consoleLog(["categories" => $categories, "products" => $products]));
-        
-    }
-
-    public function updateProduct(string $produt): void {}
+        public function updateProduct(array $product): void
+        {
+            $this->consoleLog($product);
+        }
 
     // == PRODUCTS ==
 
@@ -774,8 +780,6 @@ class Functions
 
     // == USERS ==
     // == USERS ==
-
-    // == PRODUCTS ==
-    // == PRODUCTS ==
+    
 
 }
